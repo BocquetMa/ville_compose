@@ -1,51 +1,43 @@
 package com.example.ville_compose.viewmodel
 
 import androidx.lifecycle.ViewModel
-import com.example.ville_compose.model.City
+import androidx.lifecycle.viewModelScope
+import com.example.ville_compose.model.CityEntity
 import com.example.ville_compose.repository.CityRepository
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.launch
 
-enum class SortField {
-    NAME,
-    POPULATION,
-    AREA
-}
+enum class SortField { NAME, POPULATION, AREA }
 
-class CityListViewModel (
-    private val repository: CityRepository
-) : ViewModel() {
+class CityListViewModel(private val repo: CityRepository) : ViewModel() {
 
-    private val _cities = MutableStateFlow<List<City>>(emptyList())
-    val cities: StateFlow<List<City>> = _cities.asStateFlow()
-    private var currentSortField = SortField.NAME
+    private val _sortField = MutableStateFlow(SortField.NAME)
 
-    init {
-        refreshCities()
-    }
+    val cities: StateFlow<List<CityEntity>> = repo.observeAll()
+        .combine(_sortField) { cities, sortField ->
+            when (sortField) {
+                SortField.NAME -> cities.sortedBy { it.name }
+                SortField.POPULATION -> cities.sortedBy { it.population }
+                SortField.AREA -> cities.sortedBy { it.areaKm2 }
+            }
+        }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
     fun sortCities(field: SortField) {
-        currentSortField = field
-        _cities.value = when (field) {
-            SortField.NAME -> _cities.value.sortedBy { it.name }
-            SortField.POPULATION -> _cities.value.sortedBy { it.population }
-            SortField.AREA -> _cities.value.sortedBy { it.areaKm2 }
+        _sortField.value = field
+    }
+
+    fun addCity(name: String, population: Int, areaKm2: Double) = viewModelScope.launch {
+        if (name.isNotBlank()) {
+            repo.add(name.trim(), population, areaKm2)
         }
     }
 
-    fun addCity(city: City) {
-        repository.addCity(city)
-        refreshCities()
+    fun updateCity(city: CityEntity) = viewModelScope.launch {
+        repo.update(city)
     }
 
-    fun updateCity(city: City) {
-        repository.updateCity(city)
-        refreshCities()
-    }
-
-    private fun refreshCities() {
-        _cities.value = repository.getCities()
-        sortCities(currentSortField)
+    fun deleteCity(id: Long) = viewModelScope.launch {
+        repo.delete(id)
     }
 }

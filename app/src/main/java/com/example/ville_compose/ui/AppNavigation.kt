@@ -75,10 +75,14 @@ fun AppNavigation(viewModel: CityListViewModel) {
                 )
             }
             composable(Screen.AddCity.route) {
-                AddCityScreen(onAddCity = { city ->
-                    viewModel.addCity(city)
-                    navController.navigate(Screen.CityList.route) { popUpTo(navController.graph.findStartDestination().id) }
-                })
+                AddCityScreen(
+                    viewModel = viewModel,
+                    onNavigateBack = {
+                        navController.navigate(Screen.CityList.route) {
+                            popUpTo(navController.graph.findStartDestination().id)
+                        }
+                    }
+                )
             }
             composable(
                 route = "city_detail/{cityName}",
@@ -104,10 +108,14 @@ fun AppNavigation(viewModel: CityListViewModel) {
                 val city = viewModel.cities.value.find { it.name == cityName }
                 if (city != null) {
                     EditCityScreen(
-                        city = city, 
+                        city = city,
                         onUpdateCity = { updatedCity ->
                             viewModel.updateCity(updatedCity)
                             navController.popBackStack()
+                        },
+                        onDeleteCity = { cityId ->
+                            viewModel.deleteCity(cityId)
+                            navController.popBackStack(Screen.CityList.route, inclusive = false)
                         },
                         onNavigateBack = { navController.navigateUp() }
                     )

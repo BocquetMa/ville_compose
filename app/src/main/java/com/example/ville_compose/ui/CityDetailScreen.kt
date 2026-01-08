@@ -8,11 +8,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.example.ville_compose.model.City
+import com.example.ville_compose.model.CityEntity
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CityDetailScreen(city: City, onEditClick: () -> Unit, onNavigateBack: () -> Unit) {
+fun CityDetailScreen(city: CityEntity, onEditClick: () -> Unit, onNavigateBack: () -> Unit) {
     Scaffold(
         topBar = {
             TopAppBar(
