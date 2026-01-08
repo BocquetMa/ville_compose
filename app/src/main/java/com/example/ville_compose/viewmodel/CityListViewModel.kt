@@ -14,22 +14,38 @@ enum class SortField {
 }
 
 class CityListViewModel (
-    repository: CityRepository
+    private val repository: CityRepository
 ) : ViewModel() {
 
-    private val originalCities = repository.getCities()
     private val _cities = MutableStateFlow<List<City>>(emptyList())
     val cities: StateFlow<List<City>> = _cities.asStateFlow()
+    private var currentSortField = SortField.NAME
 
     init {
-        sortCities(SortField.NAME)
+        refreshCities()
     }
 
     fun sortCities(field: SortField) {
+        currentSortField = field
         _cities.value = when (field) {
-            SortField.NAME -> originalCities.sortedBy { it.name }
-            SortField.POPULATION -> originalCities.sortedBy { it.population }
-            SortField.AREA -> originalCities.sortedBy { it.areaKm2 }
+            SortField.NAME -> _cities.value.sortedBy { it.name }
+            SortField.POPULATION -> _cities.value.sortedBy { it.population }
+            SortField.AREA -> _cities.value.sortedBy { it.areaKm2 }
         }
+    }
+
+    fun addCity(city: City) {
+        repository.addCity(city)
+        refreshCities()
+    }
+
+    fun updateCity(city: City) {
+        repository.updateCity(city)
+        refreshCities()
+    }
+
+    private fun refreshCities() {
+        _cities.value = repository.getCities()
+        sortCities(currentSortField)
     }
 }

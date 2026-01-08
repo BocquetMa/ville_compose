@@ -10,11 +10,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.unit.sp
+import com.example.ville_compose.model.City
 import com.example.ville_compose.viewmodel.CityListViewModel
 import com.example.ville_compose.viewmodel.SortField
 
 @Composable
-fun CityListScreen(viewModel: CityListViewModel) {
+fun CityListScreen(viewModel: CityListViewModel, onCityClick: (City) -> Unit) {
     val cities by viewModel.cities.collectAsState()
 
     Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
@@ -34,7 +35,7 @@ fun CityListScreen(viewModel: CityListViewModel) {
         Spacer(modifier = Modifier.height(12.dp))
         LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
             items(cities) { city ->
-                CityRow(city)
+                CityRow(city, onCityClick = { onCityClick(city) })
             }
         }
     }
