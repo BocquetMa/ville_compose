@@ -13,5 +13,8 @@ class CityRepository(private val dao: CityDao){
 
     suspend fun update(city: CityEntity) = dao.update(city)
 
+    suspend fun toggleFavorite(city: CityEntity) =
+        dao.updateFavorite(city.id, !city.isFavorite)
+
     suspend fun delete(id: Long) = dao.deleteById(id)
 }

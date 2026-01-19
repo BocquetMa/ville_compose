@@ -15,6 +15,9 @@ interface CityDao{
     @Update
     suspend fun update(city: CityEntity)
 
+    @Query("update cities set isFavorite = :isFavorite where id = :id")
+    suspend fun updateFavorite(id: Long, isFavorite: Boolean)
+
     @Query("delete from cities where id = :id")
     suspend fun deleteById(id: Long)
 }

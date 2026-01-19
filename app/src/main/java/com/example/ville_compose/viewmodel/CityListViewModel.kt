@@ -15,16 +15,22 @@ class CityListViewModel(private val repo: CityRepository) : ViewModel() {
 
     val cities: StateFlow<List<CityEntity>> = repo.observeAll()
         .combine(_sortField) { cities, sortField ->
-            when (sortField) {
+            val sortedList = when (sortField) {
                 SortField.NAME -> cities.sortedBy { it.name }
-                SortField.POPULATION -> cities.sortedBy { it.population }
-                SortField.AREA -> cities.sortedBy { it.areaKm2 }
+                SortField.POPULATION -> cities.sortedByDescending { it.population }
+                SortField.AREA -> cities.sortedByDescending { it.areaKm2 }
             }
+            // Sort by favorite first (true > false)
+            sortedList.sortedByDescending { it.isFavorite }
         }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
     fun sortCities(field: SortField) {
         _sortField.value = field
+    }
+
+    fun toggleFavorite(city: CityEntity) = viewModelScope.launch {
+        repo.toggleFavorite(city)
     }
 
     fun addCity(name: String, population: Int, areaKm2: Double) = viewModelScope.launch {

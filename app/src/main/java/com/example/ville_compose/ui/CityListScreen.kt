@@ -109,8 +109,12 @@ fun CityListScreen(viewModel: CityListViewModel, onCityClick: (CityEntity) -> Un
                 contentPadding = PaddingValues(AppSpacing.Medium),
                 verticalArrangement = Arrangement.spacedBy(AppSpacing.Medium)
             ) {
-                items(cities) { city ->
-                    CityCard(city = city, onClick = { onCityClick(city) })
+                items(cities, key = { it.id }) { city ->
+                    CityCard(
+                        city = city, 
+                        onClick = { onCityClick(city) },
+                        onFavoriteClick = { viewModel.toggleFavorite(city) }
+                    )
                 }
             }
         }
