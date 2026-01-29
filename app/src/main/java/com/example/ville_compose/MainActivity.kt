@@ -18,7 +18,8 @@ class MainActivity : ComponentActivity() {
             applicationContext,
             CityDatabase::class.java,
             "city_database"
-        ).build()
+        ).fallbackToDestructiveMigration()
+         .build()
 
         val repository = CityRepository(db.cityDao())
         val factory = CityListViewModelFactory(repository)
